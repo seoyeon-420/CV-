@@ -14,7 +14,7 @@
 4. cv2.undistort()를 사용하여 왜곡 보정한 결과를 시각화
 
 ### 전체 코드
-```phthon
+```python
 import cv2 #opencv라이브러리 불러오기
 import numpy as np #수칙계산용 NumPy 라이브러리 불러오기
 import glob #특정 경로의 여러 이미지 파일명을 한번에 불러오기위한 모듈
@@ -224,7 +224,8 @@ cv2.getRotationMatrix2D(중심좌표, 회전각도, 크기비율)
 ```python
 result = cv2.warpAffine(img, M, 결과 이미지의 크기[원본과 같은 크기의 창])
 ```
-cv2.warpAffine(원본 사진, 변환행렬, (width, height))변환행렬 M
+cv2.warpAffine(원본 사진, 변환행렬, (width, height))
+원본 이미지에 변환시킨 내용 적용
 
 ## 실습2_3 Srereo Disparity 기반 Depth 추정
 
@@ -447,3 +448,12 @@ cv2.imshow("Disparity Map", disparity_color)
 cv2.waitKey(0) # 키 입력이 들어올 때까지 창을 유지
 cv2.destroyAllWindows() # 모든 opencv 창 닫기
 ```
+
+### 결과 이미지
+![결과3](CV_3_3_result.png)
+
+### 기억사항
+```python
+
+```
+
