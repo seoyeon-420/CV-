@@ -116,6 +116,8 @@ cv2.imshow("Undistorted", undistorted) #왜곡 보정된 이미지를 화면에 
 cv2.waitKey(0) #키입력이 들어올 때까지 화면을 유지
 cv2.destroyAllWindows() #모든 opencv창 닫기
 ```
+### 결과 이미지
+![결과1](CV_2_1_result.png)
 
 ### 기억사항
 ```python
@@ -188,7 +190,6 @@ center = (width // 2, height // 2)
 # 중심 기준으로 30도 회전, 크기는 0.8배
 M = cv2.getRotationMatrix2D(center, 30, 0.8)
 
-
 # x축으로 +80, y축으로 -40 평행이동 값 추가
 # x좌표와 y좌표의 이동값을 변경시켜줌
 M[0, 2] += 80
@@ -205,8 +206,25 @@ cv2.waitKey(0) # 키 입력이 들어올 때까지 창을 유지
 cv2.destroyAllWindows() # 모든 opencv 창 닫기
 ```
 
-### 고려사항
+### 결과 이미지
+![결과2](CV_2_2_result.png)
 
+### 기억사항
+```python
+center = (width // 2, height // 2)
+M = cv2.getRotationMatrix2D(center, 30, 0.8)
+M[0, 2] += 80
+M[1, 2] += -40
+```
+cv2.getRotationMatrix2D(중심좌표, 회전각도, 크기비율)
+문제의 조건에 맞추어 회전각도=30, 크기비율=0.8을 넣음
+행렬M의 1행은 x좌표, 2행은 y좌표를 나타냄
+행렬M의 마지막 열(3열)을 이용해 사진을 평행이동시킴
+
+```python
+result = cv2.warpAffine(img, M, 결과 이미지의 크기[원본과 같은 크기의 창])
+```
+cv2.warpAffine(원본 사진, 변환행렬, (width, height))변환행렬 M
 
 ## 실습2_3 Srereo Disparity 기반 Depth 추정
 
