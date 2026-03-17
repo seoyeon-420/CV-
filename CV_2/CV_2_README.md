@@ -450,10 +450,38 @@ cv2.destroyAllWindows() # 모든 opencv 창 닫기
 ```
 
 ### 결과 이미지
-![결과3](CV_3_3_result.png)
+![결과3-1](CV_2_3_result.png)
+![결과3-2](CV_2_3_result2.png)
 
 ### 기억사항
 ```python
-
+stereo = cv2.StereoBM_create(numDisparities=64, blockSize=15)
+disparity = stereo.compute(left_gray, right_gray).astype(np.float32) / 16.0
 ```
+두 사진의 픽셀 이동량을 계산하여 물체의 depth를 구한다
+stereo: 계산 방식 설정 (두사진 사이의 변화를 최대 64px까지 탐색, 15X15의 크기 블록을 탐색)
+disparity: 각 픽셀의 위치 차이를 구함, 계산을 위하여 실수로 변환
+OpenCV StereoBM은 disparity를 16배 키워 저장하기 때문에 16으로 나누어준다
 
+```python
+valid_mask = disparity > 0
+depth_map = np.zeros_like(disparity, dtype=np.float32)
+depth_map[valid_mask] = (f * B) / disparity[valid_mask]
+```
+유효한 disparity만 골라내어 depth를 계산한다.
+depth 계산식은 z = fB / d (z:depth, f:초점 거리, B:카메라 사이 거리, d:disparity)
+
+
+Disparity
+-Left이미지와 right이미지에서 같은 물체의 픽셀 위치 차이
+-값이 클수록 가까운 물체
+
+Depth
+-Disparity를 이용하면 물체의 실제 거리 정보를 계산할 수 있음
+-Z=fB/d
+-값이 작을 수록 가까운 물체
+
+Cv2.StereoBM_create()
+-Disparity map을 계산
+-정수형 disparity 값을 16배 스케일해서 반환
+-Depth 계산을 위해서 실수 연산으로 변경 후 16으로 나눠서 사용해야함
