@@ -232,7 +232,7 @@ plt.axis("off") #깔끔한 표시를 위해 축 제거
 
 plt.subplot(1,2,2) #출력 화면을 1행2열로 나눴을때 두번째 위치에 에지 강도 이미지 표시
 plt.imshow(warped) #에지 강도 이미지를 그레이스케일로 출력
-plt.title("Warped Image") #제목 표시
+plt.title("Result Image") #제목 표시
 plt.axis("off") #깔끔한 표시를 위해 축 제거
 
 #subplot 간 간격을 자동으로 조절하여 겹치지 않게 함
@@ -247,5 +247,44 @@ plt.show()
 
 ### 기억사항
 ```python
+good_matches = [] #매칭점 선별을 위한 리스트 생성
+for m, n in matches:     
+    if m.distance < 0.7 * n.distance: 
+    #두 개의 최근접 이웃의 거리 비율이 임계값 0.7 미만인 매칭점만 선별
+        good_matches.append(m)
 
+# distance가 작은 순서대로 정렬하여 상위 50개 매칭점만 사용(노이즈 증가 방지)
+good_matches = sorted(good_matches, key=lambda x: x.distance)
+good_matches = good_matches[:50]
 ```
+m, n에 가장 가까운 매칭점과 두번째로 가까운 매칭점을 가져옴  
+두 매칭점이 너무 비슷하면 애매해지기 때문에 계산에 통과하지 못하는 매칭점들을 걸러냄  
+너무 많은 점들이 있으면 노이즈가 증가할 수 있기 때문에 매칭점은 최대 50개로 제한함
+
+```python
+#img1의 매칭점 좌표
+src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+#img2의 대응점 좌표
+dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+
+#두 이미지 사이의 변환 행렬 H 계산
+H, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
+
+# img2를 img1 좌표계로 가져오기 위해 역행렬 계산
+H_inv = np.linalg.inv(H)
+
+# 이미지 정합을 위한 캔버스 크기 계산
+h1, w1 = img1.shape[:2]
+h2, w2 = img2.shape[:2]
+
+# img2를 변형해서 큰 캔버스에 배치
+warped = cv.warpPerspective(img2, H_inv, (w1 + w2, max(h1, h2)))
+
+# img1을 기준 이미지로 왼쪽에 그대로 배치
+warped[0:h1, 0:w1] = img1
+```
+매칭된 특징점들의 좌표들을 각각의 사진들에서 가져옴  
+img2를 어디 붙일지 결정하기 위하여 변환행렬 H를 계산함  
+img1을 기준으로 두고 img2를 변형시킬 것이기 때문에 H의 역행렬을 가져옴  
+cv.warpPerspective()를 이용하여 img2를 img1에 대응점에 맞게 붙임  
+cv.warpPerspective(img, 변환시킬 행렬, 출력 크기)
